@@ -78,6 +78,21 @@ export const A = {
   nodeAction: (id, node, action) =>
     api.post(`/scenarios/${id}/nodes/${encodeURIComponent(node)}/action?action=${action}`),
   c2: (id) => api.get(`/scenarios/${id}/c2`),
+  ot: (id) => api.get(`/scenarios/${id}/ot`),
+  // MOD-02 Web Security Lab
+  websecRegistry: () => api.get("/lab/websec/registry"),
+  websecPatch: (vuln, patched) => api.post(`/lab/websec/patch?vuln=${vuln}&patched=${patched}`),
+  websecExploit: (vuln) => {
+    switch (vuln) {
+      case "sqli": return api.post("/lab/websec/login", { username: "admin'--", password: "x" });
+      case "xss": return api.get(`/lab/websec/search?q=${encodeURIComponent("<script>alert(1)</script>")}`);
+      case "idor": return api.get("/lab/websec/invoice/3?as_user=trainee-01");
+      case "cmdi": return api.get(`/lab/websec/ping?host=${encodeURIComponent("127.0.0.1;id")}`);
+      case "exposure": return api.get("/lab/websec/debug");
+      default: return Promise.reject(new Error("unknown vuln"));
+    }
+  },
+
   guardrails: () => api.get("/admin/guardrails"),
   killSwitch: (value) => api.post("/admin/kill-switch", { value }),
   audit: (limit = 100) => api.get(`/admin/audit?limit=${limit}`),

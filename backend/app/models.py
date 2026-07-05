@@ -176,3 +176,15 @@ class Setting(SQLModel, table=True):
 
     key: str = Field(primary_key=True)
     value: str = ""
+
+
+class WebSecAttempt(SQLModel, table=True):
+    """An exploit attempt against the MOD-02 Web Security Lab."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    ts: datetime = Field(default_factory=utcnow, index=True)
+    vuln_id: str = Field(index=True)
+    payload: str = ""
+    success: bool = False        # did the attack work (i.e. was the vuln unpatched)?
+    src_ip: str = ""
+    detail: str = ""

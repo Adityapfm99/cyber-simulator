@@ -3,6 +3,8 @@ import { A, login, logout, getToken, getRole, getUsername } from "./api.js";
 import TopologyGraph from "./TopologyGraph.jsx";
 import CommanderView from "./CommanderView.jsx";
 import Help from "./Help.jsx";
+import WebSecLab from "./WebSecLab.jsx";
+import OTView from "./OTView.jsx";
 
 const TARGETS = { TTD: 300, TTT: 600, TTC: 1800, TTR: 3600 };
 const CAN = {
@@ -278,13 +280,24 @@ function Dashboard({ onLogout }) {
   const [toast, setToast] = useState("");
   const [err, setErr] = useState("");
   const [showHelp, setShowHelp] = useState(false);
+  const [showLab, setShowLab] = useState(false);
+  const [showOT, setShowOT] = useState(false);
 
   const canManage = CAN.manage.includes(role);
 
   const loadScenarios = useCallback(() => A.scenarios().then(setScenarios), []);
   const loadGuardrails = useCallback(() => A.guardrails().then(setGuardrails), []);
 
-  useEffect(() => { loadScenarios(); loadGuardrails(); }, []);
+  useEffect(() => {
+    A.scenarios().then((list) => {
+      setScenarios(list);
+      if (list.length) {
+        const pick = list.find((s) => s.status === "running") || list[0];
+        setSelectedId((cur) => cur ?? pick.id);
+      }
+    });
+    loadGuardrails();
+  }, []);
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 3500); };
 
@@ -346,6 +359,8 @@ function Dashboard({ onLogout }) {
         </span>
         <span className="spacer" style={{ flex: 1 }} />
         <span className="role-badge">{user} · {role}</span>
+        <button className="ghost" onClick={() => setShowOT(true)}>🏭 OT/ICS HMI</button>
+        <button className="ghost" onClick={() => setShowLab(true)}>🕸 Web Sec Lab</button>
         <button className="help-btn ghost" onClick={() => setShowHelp(true)}>📖 Guide</button>
         {CAN.manage.includes(role) && (
           <button className="danger" onClick={killSwitch}>
@@ -355,6 +370,8 @@ function Dashboard({ onLogout }) {
         <button className="ghost" onClick={onLogout}>Logout</button>
       </div>
       <Help open={showHelp} onClose={() => setShowHelp(false)} />
+      <WebSecLab open={showLab} onClose={() => setShowLab(false)} />
+      <OTView open={showOT} onClose={() => setShowOT(false)} scenarioId={selectedId} />
 
       <div className="layout">
         <div className="col">

@@ -5,13 +5,17 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import (
-    APIRouter, Depends, HTTPException, Response, WebSocket, WebSocketDisconnect,
+    APIRouter, Depends, HTTPException, Request, Response, WebSocket,
+    WebSocketDisconnect,
 )
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
-from . import aar, audit, c2, config, events, guardrails, scenarios, scoring, soc
+from . import (
+    aar, audit, c2, config, events, guardrails, ot, scenarios, scoring, soc,
+    webseclab,
+)
 from .auth import authenticate, create_token, get_current_user, require_roles
 from .database import get_session
 from .guardrails import GuardrailViolation
@@ -169,6 +173,21 @@ def c2_dashboard(
 
 
 # --------------------------------------------------------------------------- #
+# MOD-03 OT/ICS Digital Twin — HMI telemetry
+# --------------------------------------------------------------------------- #
+@router.get("/scenarios/{scenario_id}/ot", tags=["ot"])
+def ot_telemetry(
+    scenario_id: int,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    try:
+        return ot.telemetry(session, scenario_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
+
+
+# --------------------------------------------------------------------------- #
 # Events (§2 Event Injection / §3 attacks)
 # --------------------------------------------------------------------------- #
 class CreateEvent(BaseModel):
@@ -320,6 +339,101 @@ def aar_pdf(
     return Response(content=data, media_type=media, headers={
         "Content-Disposition": f'attachment; filename="aar-scenario-{scenario_id}.{ext}"'
     })
+
+
+# --------------------------------------------------------------------------- #
+# MOD-02 Web Security Lab (§3) — deliberately-vulnerable training app (sandboxed)
+# --------------------------------------------------------------------------- #
+class LoginBody(BaseModel):
+    username: str = ""
+    password: str = ""
+
+
+def _client_ip(request: Request) -> str:
+    return request.client.host if request.client else ""
+
+
+def _websec(exc: webseclab.WebSecError) -> HTTPException:
+    return HTTPException(status_code=403, detail=str(exc))
+
+
+@router.get("/lab/websec/registry", tags=["webseclab"])
+def websec_registry(
+    user: User = Depends(get_current_user), session: Session = Depends(get_session)
+):
+    return webseclab.registry(session)
+
+
+@router.get("/lab/websec/attempts", tags=["webseclab"])
+def websec_attempts(
+    limit: int = 50,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    return webseclab.recent_attempts(session, limit)
+
+
+@router.post("/lab/websec/patch", tags=["webseclab"])
+def websec_patch(
+    vuln: str,
+    patched: bool,
+    user: User = Depends(require_roles(Role.ADMIN, Role.ANALYST)),
+    session: Session = Depends(get_session),
+):
+    try:
+        webseclab.set_patched(session, user.username, vuln, patched)
+    except webseclab.WebSecError as exc:
+        raise _websec(exc)
+    return webseclab.registry(session)
+
+
+@router.post("/lab/websec/login", tags=["webseclab"])
+def websec_login(
+    body: LoginBody, request: Request,
+    user: User = Depends(get_current_user), session: Session = Depends(get_session),
+):
+    return webseclab.login(session, body.username, body.password, _client_ip(request))
+
+
+@router.get("/lab/websec/search", tags=["webseclab"])
+def websec_search(
+    q: str, request: Request,
+    user: User = Depends(get_current_user), session: Session = Depends(get_session),
+):
+    return webseclab.search(session, q, _client_ip(request))
+
+
+@router.get("/lab/websec/invoice/{invoice_id}", tags=["webseclab"])
+def websec_invoice(
+    invoice_id: int, request: Request, as_user: str = "",
+    user: User = Depends(get_current_user), session: Session = Depends(get_session),
+):
+    try:
+        return webseclab.invoice(session, invoice_id, as_user, _client_ip(request))
+    except webseclab.WebSecError as exc:
+        raise _websec(exc)
+
+
+@router.get("/lab/websec/ping", tags=["webseclab"])
+def websec_ping(
+    host: str, request: Request,
+    user: User = Depends(get_current_user), session: Session = Depends(get_session),
+):
+    try:
+        return webseclab.ping(session, host, _client_ip(request))
+    except webseclab.WebSecError as exc:
+        raise _websec(exc)
+
+
+@router.get("/lab/websec/debug", tags=["webseclab"])
+def websec_debug(
+    request: Request,
+    user: User = Depends(get_current_user), session: Session = Depends(get_session),
+):
+    try:
+        return webseclab.debug(session, _client_ip(request))
+    except webseclab.WebSecError as exc:
+        raise _websec(exc)
 
 
 # --------------------------------------------------------------------------- #

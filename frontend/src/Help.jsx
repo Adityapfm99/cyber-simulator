@@ -21,6 +21,10 @@ export default function Help({ open, onClose }) {
             <li>Select it in the list, then click <b>Deploy</b> in the top bar of the
               centre panel. The topology instantiates and the SOC feed starts streaming.</li>
           </ol>
+          <p style={{ fontSize: 12, color: "var(--muted)", margin: "4px 0 0" }}>
+            💡 <b>Live Topology</b>: drag a node to move it, scroll to zoom, drag the
+            background to pan, and use <b>reset</b> to restore the layout.
+          </p>
         </div>
 
         <div className="guide-section">
@@ -41,7 +45,22 @@ export default function Help({ open, onClose }) {
         </div>
 
         <div className="guide-section">
-          <h3>3 · Commander &amp; safety</h3>
+          <h3>3 · Training modules <span className="role-note">top bar buttons</span></h3>
+          <ul>
+            <li><b>🕸 Web Sec Lab</b> (MOD-02): a deliberately-vulnerable web app (OWASP
+              Top 10 — SQLi, XSS, IDOR, command injection, data exposure), all sandboxed
+              dummy data. Click <b>Uji exploit / Test exploit</b> to see each flaw, then
+              <b> Patch</b> it (SOC Analyst) — the hardening score rises as you secure them.</li>
+            <li><b>🏭 OT/ICS HMI</b> (MOD-03): a SCADA/HMI digital twin with live power &amp;
+              HVAC gauges. Select an <i>OT/ICS Base</i> scenario, inject <code>ot_fault</code>,
+              then open this to watch the gauges go <b>red / alarm</b> (overvoltage, cooling
+              failure). <b>Restore</b> the OT node to bring them back to green.</li>
+            <li><b>SOC Simulator</b> (MOD-01): the live SOC/SIEM feed in the centre panel.</li>
+          </ul>
+        </div>
+
+        <div className="guide-section">
+          <h3>4 · Commander &amp; safety</h3>
           <ul>
             <li><b>Commander</b> sees a C2 leadership dashboard. Inject a <code>c2_jamming</code>
               event to see the situational feed become stale and conflicting.</li>
