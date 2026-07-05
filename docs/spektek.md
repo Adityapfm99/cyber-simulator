@@ -36,7 +36,35 @@ Spektek terdiri dari empat bagian:
 
 ---
 
-## 3. Bagian 1 — Infrastruktur Hardware & Jaringan
+## 3. Definisi & Istilah
+
+| Istilah | Penjelasan |
+|---|---|
+| **Cyber Range** | Lingkungan laboratorium terisolasi untuk simulasi serangan & latihan pertahanan siber |
+| **Blue Team** | Tim bertahan (defensive) yang mendeteksi & menanggulangi serangan |
+| **Air-Gap** | Pemisahan fisik/logis total dari jaringan lain (tidak ada koneksi internet) |
+| **SOC** | Security Operations Center — pusat pemantauan keamanan |
+| **SIEM** | Security Information and Event Management — agregasi & korelasi log |
+| **EDR** | Endpoint Detection and Response — sensor keamanan di endpoint |
+| **NGFW** | Next-Generation Firewall — firewall dengan kontrol aplikasi & egress |
+| **OT / ICS** | Operational Technology / Industrial Control System (mis. SCADA/HMI/PLC) |
+| **SCADA / HMI** | Sistem kendali & antarmuka operator untuk fasilitas (power, HVAC) |
+| **C2** | Command and Control — jalur komando & kendali |
+| **ToR Switch** | Top-of-Rack switch — switch akses per rak |
+| **MLAG** | Multi-chassis Link Aggregation — agregasi link redundan antar-switch |
+| **VLAN** | Virtual LAN — segmentasi jaringan logis |
+| **RBAC** | Role-Based Access Control — kontrol akses berbasis peran |
+| **AAR** | After-Action Review — laporan evaluasi pasca-latihan |
+| **TTD/TTT/TTC/TTR** | Time to Detect / Triage / Contain / Recover — metrik waktu respons insiden |
+
+---
+
+## 4. Bagian 1 — Infrastruktur Hardware & Jaringan
+
+![Arsitektur Infrastruktur Cyber Range](infrastructure-topology.svg)
+
+*Gambar 1. Topologi infrastruktur cyber range: 4 compute node, All-Flash SAN,
+2 ToR switch (redundan/MLAG), NGFW, isolasi air-gap, dan segmentasi VLAN.*
 
 | ID | Requirement | Spesifikasi minimum |
 |---|---|---|
@@ -47,9 +75,17 @@ Spektek terdiri dari empat bagian:
 | INF-05 | Firewall | 1 × NGFW untuk kontrol egress |
 | INF-06 | Isolasi | Air-gap + segmentasi VLAN ketat dari jaringan produksi |
 
+**Segmentasi VLAN:**
+
+| VLAN | Segmen | Isi |
+|---|---|---|
+| VLAN 10 | Target Range | VM/container skenario (target latihan) |
+| VLAN 20 | SOC / Monitoring | SIEM, sensor, koleksi log |
+| VLAN 99 | Manajemen / Exercise Control | Konsol Exercise Director, SOC, Commander |
+
 ---
 
-## 4. Bagian 2 — Perangkat Lunak Platform Inti
+## 5. Bagian 2 — Perangkat Lunak Platform Inti
 
 | ID | Requirement | Deskripsi |
 |---|---|---|
@@ -72,7 +108,7 @@ Spektek terdiri dari empat bagian:
 
 ---
 
-## 5. Bagian 3 — Modul Pelatihan & Skenario
+## 6. Bagian 3 — Modul Pelatihan & Skenario
 
 | ID | Modul | Deskripsi |
 |---|---|---|
@@ -84,7 +120,7 @@ Spektek terdiri dari empat bagian:
 
 ---
 
-## 6. Bagian 4 — Guardrail Keamanan Wajib (Kritikal)
+## 7. Bagian 4 — Guardrail Keamanan Wajib (Kritikal)
 
 | ID | Requirement | Deskripsi |
 |---|---|---|
@@ -96,7 +132,7 @@ Spektek terdiri dari empat bagian:
 
 ---
 
-## 7. Persyaratan Non-Fungsional
+## 8. Persyaratan Non-Fungsional
 
 | ID | Kategori | Requirement |
 |---|---|---|
@@ -108,7 +144,21 @@ Spektek terdiri dari empat bagian:
 
 ---
 
-## 8. Kriteria Penerimaan (Acceptance)
+## 9. Lingkup Pekerjaan (Scope of Work)
+
+Lingkup yang diharapkan dari mitra teknis/penyedia:
+
+1. **Instalasi & konfigurasi** infrastruktur (compute, storage, jaringan, NGFW) sesuai Bagian 1.
+2. **Deployment platform** perangkat lunak (Bagian 2) dan integrasi modul pelatihan (Bagian 3).
+3. **Penerapan guardrail keamanan** (Bagian 4) dan verifikasi isolasi/air-gap.
+4. **Pengujian**: FAT (Factory Acceptance Test) dan SAT/UAT (Site/User Acceptance Test).
+5. **Pelatihan & transfer knowledge** untuk operator (Exercise Director, SOC, Commander).
+6. **Dokumentasi serah terima**: as-built, manual operasi, SOP, dan hasil pengujian.
+7. **Dukungan** pasca-implementasi (masa garansi & pemeliharaan — disepakati terpisah).
+
+---
+
+## 10. Kriteria Penerimaan (Acceptance)
 
 1. Exercise Director dapat membuat, men-deploy, dan menghancurkan minimal 2 template skenario.
 2. Injeksi serangan dummy memunculkan log SIEM & membuka insiden yang ter-skor.
