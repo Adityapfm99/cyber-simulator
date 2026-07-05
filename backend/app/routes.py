@@ -13,8 +13,8 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from . import (
-    aar, audit, c2, config, events, guardrails, ot, scenarios, scoring, soc,
-    webseclab,
+    aar, audit, c2, config, defense, events, guardrails, ot, scenarios, scoring,
+    soc, webseclab,
 )
 from .auth import authenticate, create_token, get_current_user, require_roles
 from .database import get_session
@@ -243,6 +243,10 @@ async def inject_event(
     sid = result["event"].scenario_id
     for lg in result["logs"]:
         await hub.publish(sid, {"kind": "log", "data": lg})
+    if result.get("blocked"):
+        # Attacker was on the NGFW blocklist — prevented, no incident opened.
+        return {"event_id": result["event"].id, "incident_id": None,
+                "blocked": True, "logs": result["logs"]}
     await hub.publish(sid, {"kind": "event", "data": {
         "title": result["event"].title, "type": result["event"].type,
         "incident_id": result["incident"].id,
@@ -311,6 +315,36 @@ async def advance_incident(
     }})
     return {"id": inc.id, "status": inc.status, "score": inc.score,
             "metrics": scoring.metrics(inc)}
+
+
+@router.post("/incidents/{incident_id}/defend", tags=["scoring"])
+async def defend_incident(
+    incident_id: int,
+    action: str,
+    target: str = "",
+    user: User = Depends(require_roles(Role.ADMIN, Role.ANALYST)),
+    session: Session = Depends(get_session),
+):
+    try:
+        result = defense.apply(session, user.username, incident_id, action, target)
+    except defense.DefenseError as exc:
+        raise HTTPException(422, str(exc))
+    from .models import Incident as _Inc
+    inc = session.get(_Inc, incident_id)
+    if inc is not None:
+        await hub.publish(inc.scenario_id, {"kind": "incident", "data": {
+            "id": inc.id, "status": inc.status, "score": inc.score}})
+        await hub.publish(inc.scenario_id, {"kind": "topology",
+                                            "data": scenarios.topology(session, inc.scenario_id)})
+    return result
+
+
+@router.get("/defense/blocklist", tags=["scoring"])
+def defense_blocklist(
+    scenario_id: Optional[int] = None,
+    user: User = Depends(get_current_user), session: Session = Depends(get_session)
+):
+    return defense.blocklist(session, scenario_id)
 
 
 # --------------------------------------------------------------------------- #

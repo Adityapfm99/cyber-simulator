@@ -117,24 +117,27 @@ export default function Help({ open, onClose }) {
           <h3>7 · Attack catalog <span className="role-note">Inject Event → type</span></h3>
           <p style={{ fontSize: 12.5, margin: "0 0 6px" }}>
             10 dummy attack types (allowlist-enforced — no real malware). Each turns the
-            target node red and opens a scored incident.
+            target node red and opens a scored incident. In the <b>Incidents</b> panel each
+            incident shows its <b>countermeasures</b> — pick the <b>right one</b> for the
+            attack (a wrong action has no effect). Blocking a source IP also stops follow-on
+            attacks from it.
           </p>
           <div style={{ overflowX: "auto" }}>
             <table>
               <thead>
-                <tr><th>Type</th><th>What it does</th><th>ATT&amp;CK phase</th></tr>
+                <tr><th>Type</th><th>What it does</th><th>Effective countermeasure</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>portscan</code></td><td>Scans ports to find open services</td><td>Reconnaissance</td></tr>
-                <tr><td><code>phishing</code></td><td>Fake link/portal to steal credentials</td><td>Initial Access</td></tr>
-                <tr><td><code>supply_chain_anomaly</code></td><td>Vendor compromise — expired cert / hash mismatch</td><td>Supply Chain</td></tr>
-                <tr><td><code>bruteforce</code></td><td>Repeated password guessing</td><td>Credential Access</td></tr>
-                <tr><td><code>lateral_move</code></td><td>Host-to-host spread after a breach</td><td>Lateral Movement</td></tr>
-                <tr><td><code>ransomware</code></td><td>Encrypts files for ransom (dummy)</td><td>Impact</td></tr>
-                <tr><td><code>data_exfil</code></td><td>Steals &amp; uploads data out</td><td>Exfiltration</td></tr>
-                <tr><td><code>dns_tunnel</code></td><td>Covert channel hidden inside DNS queries</td><td>C2 / Exfil</td></tr>
-                <tr><td><code>ot_fault</code></td><td>OT/ICS attack → physical failure (power/HVAC)</td><td>Impact (OT)</td></tr>
-                <tr><td><code>c2_jamming</code></td><td>Disrupts comms → stale/conflicting leader data</td><td>Inhibit C2</td></tr>
+                <tr><td><code>portscan</code></td><td>Scans ports to find open services</td><td>Block source IP · harden ports</td></tr>
+                <tr><td><code>phishing</code></td><td>Fake link/portal to steal credentials</td><td>Block domain · reset credentials</td></tr>
+                <tr><td><code>supply_chain_anomaly</code></td><td>Vendor compromise — expired cert / hash mismatch</td><td>Quarantine vendor / revoke cert</td></tr>
+                <tr><td><code>bruteforce</code></td><td>Repeated password guessing</td><td>Reset credentials · block IP</td></tr>
+                <tr><td><code>lateral_move</code></td><td>Host-to-host spread after a breach</td><td>Isolate host · block IP</td></tr>
+                <tr><td><code>ransomware</code></td><td>Encrypts files for ransom (dummy)</td><td>Isolate · block C2 domain · restore backup</td></tr>
+                <tr><td><code>data_exfil</code></td><td>Steals &amp; uploads data out</td><td>Block IP/domain · enable DLP</td></tr>
+                <tr><td><code>dns_tunnel</code></td><td>Covert channel hidden inside DNS queries</td><td>Block domain · enable DLP</td></tr>
+                <tr><td><code>ot_fault</code></td><td>OT/ICS attack → physical failure (power/HVAC)</td><td>Isolate PLC · safe mode</td></tr>
+                <tr><td><code>c2_jamming</code></td><td>Disrupts comms → stale/conflicting leader data</td><td>Switch to backup comms</td></tr>
               </tbody>
             </table>
           </div>

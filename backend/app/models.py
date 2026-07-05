@@ -178,6 +178,20 @@ class Setting(SQLModel, table=True):
     value: str = ""
 
 
+class Defense(SQLModel, table=True):
+    """A countermeasure applied by the blue team (also serves as the blocklist)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    ts: datetime = Field(default_factory=utcnow, index=True)
+    scenario_id: Optional[int] = Field(default=None, index=True)
+    incident_id: Optional[int] = None
+    attack_type: str = ""
+    action: str = Field(index=True)     # e.g. "block_ip"
+    target: str = ""                    # ip / domain / node
+    effective: bool = True
+    actor: str = ""
+
+
 class WebSecAttempt(SQLModel, table=True):
     """An exploit attempt against the MOD-02 Web Security Lab."""
 

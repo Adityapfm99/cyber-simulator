@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from sqlmodel import Session, select
 
 from . import audit, guardrails, scoring, soc
-from .models import Event, Node, NodeStatus, Scenario, ScenarioStatus, utcnow
+from .models import Event, LogEntry, Node, NodeStatus, Scenario, ScenarioStatus, utcnow
 
 # Attacker's dummy source address (clearly not a real host).
 ATTACKER_IP = "10.66.66.66"
@@ -70,6 +70,29 @@ def inject(session: Session, actor: str, event_id: int) -> dict:
     scenario = session.get(Scenario, event.scenario_id)
     if scenario is None or scenario.status != ScenarioStatus.RUNNING:
         raise guardrails.GuardrailViolation("Scenario is not running")
+
+    # Persistent defense: if the attacker IP is on the blocklist, the NGFW stops
+    # the attack before it lands (no compromise, no incident).
+    from . import defense
+    if defense.is_ip_blocked(session, ATTACKER_IP, event.scenario_id):
+        blocked_log = LogEntry(
+            scenario_id=event.scenario_id, source="firewall", severity="notice",
+            src_ip=ATTACKER_IP, dst_ip="",
+            message=f"BLOCK {event.type} from {ATTACKER_IP} — source on NGFW blocklist "
+                    f"(attack prevented)",
+        )
+        session.add(blocked_log)
+        event.status = "injected"
+        event.injected_at = utcnow()
+        event.injected_by = actor
+        session.add(event)
+        session.commit()
+        audit.record(session, actor, "event.inject.blocked", str(event.id),
+                     {"type": event.type, "reason": "attacker IP blocklisted"})
+        return {"event": event, "incident": None, "blocked": True,
+                "logs": [{"source": "firewall", "severity": "notice",
+                          "message": blocked_log.message, "src_ip": ATTACKER_IP,
+                          "dst_ip": ""}]}
 
     # Resolve target node.
     target = None

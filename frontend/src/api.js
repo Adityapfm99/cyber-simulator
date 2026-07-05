@@ -75,6 +75,8 @@ export const A = {
   logs: (id, limit = 150) => api.get(`/scenarios/${id}/logs?limit=${limit}`),
   scoreboard: (id) => api.get(`/scenarios/${id}/scoreboard`),
   advance: (incId, action) => api.post(`/incidents/${incId}/advance?action=${action}`),
+  defend: (incId, action, target = "") =>
+    api.post(`/incidents/${incId}/defend?action=${action}${target ? `&target=${encodeURIComponent(target)}` : ""}`),
   nodeAction: (id, node, action) =>
     api.post(`/scenarios/${id}/nodes/${encodeURIComponent(node)}/action?action=${action}`),
   c2: (id) => api.get(`/scenarios/${id}/c2`),

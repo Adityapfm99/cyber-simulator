@@ -157,15 +157,9 @@ function EventPanel({ scenario, nodes, onInject, role }) {
 }
 
 // --------------------------------------------------------------------------- //
-function IncidentPanel({ scoreboard, role, onAdvance }) {
+function IncidentPanel({ scoreboard, role, onAdvance, onDefend }) {
   const canRespond = CAN.respond.includes(role);
   const rows = scoreboard?.incidents || [];
-  const ACTIONS = [
-    ["detected", "detect", "detected_at"],
-    ["triaged", "triage", "triaged_at"],
-    ["contained", "contain", "contained_at"],
-    ["recovered", "recover", "recovered_at"],
-  ];
   const nextAction = (status) => {
     const order = ["open", "detected", "triaged", "contained", "recovered"];
     const idx = order.indexOf(status);
@@ -201,13 +195,33 @@ function IncidentPanel({ scoreboard, role, onAdvance }) {
               </div>
               <div className="row">
                 <span className={`status-tag status-running`}>{inc.status}</span>
+                {inc.attack_type && (
+                  <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 6 }}>
+                    {inc.attack_type}
+                  </span>
+                )}
                 <span style={{ flex: 1 }} />
                 {canRespond && na && (
-                  <button className="primary" onClick={() => onAdvance(inc.id, na)}>
-                    {na} ▶
-                  </button>
+                  <button onClick={() => onAdvance(inc.id, na)}>{na} ▶</button>
                 )}
               </div>
+              {canRespond && inc.status !== "recovered" && (inc.countermeasures || []).length > 0 && (
+                <div style={{ marginTop: 7, borderTop: "1px solid #182230", paddingTop: 6 }}>
+                  <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>
+                    Countermeasures (pick the right one):
+                  </div>
+                  <div className="row wrap" style={{ gap: 5 }}>
+                    {inc.countermeasures.map((cm) => (
+                      <button key={cm.id} disabled={cm.applied}
+                        title={cm.target ? `target: ${cm.target}` : ""}
+                        style={{ fontSize: 11, padding: "4px 8px", opacity: cm.applied ? 0.5 : 1 }}
+                        onClick={() => onDefend(inc.id, cm.id)}>
+                        {cm.applied ? "✓ " : ""}{cm.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -334,6 +348,11 @@ function Dashboard({ onLogout }) {
   const deploy = wrap(async () => { await A.deploy(selectedId); await refreshScenario(selectedId); await loadScenarios(); });
   const destroy = wrap(async () => { await A.destroy(selectedId); await refreshScenario(selectedId); await loadScenarios(); });
   const advance = wrap(async (incId, action) => { await A.advance(incId, action); await A.scoreboard(selectedId).then(setScoreboard); });
+  const defend = wrap(async (incId, action) => {
+    const r = await A.defend(incId, action);
+    showToast((r.effective ? "✅ " : "⚠ ") + r.message);
+    await refreshScenario(selectedId);
+  });
   const doNodeAction = wrap(async (node, action) => {
     await A.nodeAction(selectedId, node, action);
     await refreshScenario(selectedId);
@@ -406,7 +425,7 @@ function Dashboard({ onLogout }) {
         <div className="col">
           {scenario && <EventPanel scenario={scenario} nodes={topology.nodes} onInject={() => refreshScenario(selectedId)} role={role} />}
           <ContainmentPanel nodes={topology.nodes} role={role} onAction={doNodeAction} />
-          <IncidentPanel scoreboard={scoreboard} role={role} onAdvance={advance} />
+          <IncidentPanel scoreboard={scoreboard} role={role} onAdvance={advance} onDefend={defend} />
         </div>
       </div>
       {toast && <div className="toast">{toast}</div>}

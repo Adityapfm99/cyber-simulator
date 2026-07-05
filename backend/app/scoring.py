@@ -81,6 +81,23 @@ def advance(session: Session, actor: str, incident_id: int, action: str) -> Inci
     return incident
 
 
+def ensure_contained(session: Session, actor: str, incident_id: int) -> Incident:
+    """Fast-forward an incident to 'contained', stamping any missing earlier phases.
+
+    Applying a correct countermeasure implies the analyst detected, triaged, and
+    contained the incident — so we stamp all three (with current timestamps).
+    """
+    incident = session.get(Incident, incident_id)
+    if incident is None:
+        raise guardrails.GuardrailViolation("Incident not found")
+    for action in ("detect", "triage", "contain"):
+        field, _ = _TRANSITIONS[action]
+        if getattr(incident, field) is None:
+            advance(session, actor, incident_id, action)
+            incident = session.get(Incident, incident_id)
+    return incident
+
+
 def open_incident(session: Session, scenario_id: int, event_id: int, title: str) -> Incident:
     incident = Incident(
         scenario_id=scenario_id, event_id=event_id, title=title,
@@ -96,13 +113,16 @@ def scenario_scoreboard(session: Session, scenario_id: int) -> dict:
     incidents = session.exec(
         select(Incident).where(Incident.scenario_id == scenario_id)
     ).all()
+    from . import defense  # local import avoids a circular dependency
     rows = []
     total = 0
     for inc in incidents:
         m = metrics(inc)
+        cm = defense.available_for(session, inc)
         rows.append({
             "id": inc.id, "title": inc.title, "status": inc.status,
             "assigned_to": inc.assigned_to, "score": inc.score, "metrics": m,
+            "attack_type": cm["attack_type"], "countermeasures": cm["countermeasures"],
         })
         total += inc.score or 0
     avg = round(total / len(incidents)) if incidents else 0
