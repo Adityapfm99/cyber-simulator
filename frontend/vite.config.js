@@ -6,14 +6,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // Backend serves everything under /api (matches the Vercel deployment),
+      // so forward the prefix unchanged.
       "/api": {
         target: "http://localhost:8000",
         changeOrigin: true,
-        rewrite: (p) => p.replace(/^\/api/, ""),
-      },
-      "/ws": {
-        target: "ws://localhost:8000",
-        ws: true,
       },
     },
   },

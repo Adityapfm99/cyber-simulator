@@ -7,11 +7,27 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from .config import DATABASE_URL
 
-engine = create_engine(
-    DATABASE_URL,
-    echo=False,
-    connect_args={"check_same_thread": False},
-)
+
+def _normalize(url: str) -> str:
+    # Hosts hand out postgres:// or postgresql:// — SQLAlchemy needs an explicit
+    # driver; we bundle psycopg (v3).
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    return url
+
+
+def _make_engine():
+    url = _normalize(DATABASE_URL)
+    if url.startswith("sqlite"):
+        return create_engine(url, echo=False, connect_args={"check_same_thread": False})
+    # pool_pre_ping avoids stale connections when a serverless function reuses a
+    # warm instance after the DB dropped an idle connection.
+    return create_engine(url, echo=False, pool_pre_ping=True)
+
+
+engine = _make_engine()
 
 
 def init_db() -> None:

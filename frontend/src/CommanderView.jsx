@@ -1,7 +1,8 @@
 // Commander leadership console — the §3 C2 Resilience picture.
 // Under simulated jamming the feed intentionally shows stale/conflicting data.
-import React, { useEffect, useRef, useState } from "react";
-import { A, getUsername, getRole, openFeed } from "./api.js";
+import React, { useEffect, useState } from "react";
+import { A, getUsername, getRole } from "./api.js";
+import Help from "./Help.jsx";
 
 const FAC_COLOR = {
   operational: "var(--ok)",
@@ -15,7 +16,7 @@ export default function CommanderView({ onLogout }) {
   const [scenarios, setScenarios] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [c2, setC2] = useState(null);
-  const wsRef = useRef(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     A.scenarios().then((s) => {
@@ -31,16 +32,7 @@ export default function CommanderView({ onLogout }) {
     if (!selectedId) return;
     load(selectedId);
     const poll = setInterval(() => load(selectedId), 3000);
-    if (wsRef.current) wsRef.current.close();
-    wsRef.current = openFeed(selectedId, (msg) => {
-      if (["event", "incident", "topology", "status", "killswitch"].includes(msg.kind)) {
-        load(selectedId);
-      }
-    });
-    return () => {
-      clearInterval(poll);
-      wsRef.current && wsRef.current.close();
-    };
+    return () => clearInterval(poll);
   }, [selectedId]);
 
   const degraded = c2?.c2_link?.status === "degraded";
@@ -54,8 +46,10 @@ export default function CommanderView({ onLogout }) {
         </select>
         <span className="spacer" style={{ flex: 1 }} />
         <span className="role-badge">{getUsername()} · {getRole()}</span>
+        <button className="help-btn ghost" onClick={() => setShowHelp(true)}>📖 Guide</button>
         <button className="ghost" onClick={onLogout}>Logout</button>
       </div>
+      <Help open={showHelp} onClose={() => setShowHelp(false)} />
 
       {!c2 ? (
         <div className="empty" style={{ marginTop: 40 }}>No scenario data. Ask the Exercise Director to deploy one.</div>

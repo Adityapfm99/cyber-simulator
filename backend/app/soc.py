@@ -12,11 +12,11 @@ templates rather than true randomness.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import time
 
 from sqlmodel import Session, select
 
-from .models import LogEntry, Node
+from .models import LogEntry, Node, as_utc, utcnow
 
 SOURCES = ["firewall", "edr", "dns", "proxy"]
 
@@ -32,6 +32,35 @@ _WHO = ["trainee-01", "trainee-02", "operator-a", "npc-user"]
 
 def _pick(seq, i):
     return seq[i % len(seq)]
+
+
+def lazy_fill(session: Session, scenario_id: int, max_batches: int = 6) -> list[LogEntry]:
+    """Generate the baseline traffic that *would* have accrued since the last log.
+
+    Used in serverless mode where there is no always-on ticker: each time the
+    client polls for logs we materialize roughly one batch per elapsed 2s window
+    (capped), keeping the lab feeling "alive" without a background process.
+    """
+    last = session.exec(
+        select(LogEntry).where(LogEntry.scenario_id == scenario_id)
+        .order_by(LogEntry.id.desc())
+    ).first()
+    if last is None:
+        batches = 1
+    else:
+        elapsed = (utcnow() - as_utc(last.ts)).total_seconds()
+        batches = int(elapsed // 2)
+    batches = max(0, min(batches, max_batches))
+    created: list[LogEntry] = []
+    base = int(time.time())
+    for k in range(batches):
+        logs = generate_baseline(session, scenario_id, base + k)
+        for lg in logs:
+            session.add(lg)
+        created.extend(logs)
+    if created:
+        session.commit()
+    return created
 
 
 def generate_baseline(session: Session, scenario_id: int, seed: int) -> list[LogEntry]:

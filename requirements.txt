@@ -1,0 +1,7 @@
+# Python dependencies for the Vercel serverless function (api/index.py).
+fastapi>=0.110
+sqlmodel>=0.0.16
+pyyaml>=6.0
+python-multipart>=0.0.9
+reportlab>=4.0
+psycopg[binary]>=3.1

@@ -85,16 +85,5 @@ export const A = {
   aarUrl: (id) => `${BASE}/scenarios/${id}/aar.pdf`,
 };
 
-export function openFeed(scenarioId, onMessage) {
-  const proto = location.protocol === "https:" ? "wss" : "ws";
-  const ws = new WebSocket(`${proto}://${location.host}/ws/scenarios/${scenarioId}`);
-  ws.onmessage = (e) => {
-    try {
-      onMessage(JSON.parse(e.data));
-    } catch {}
-  };
-  // keepalive
-  const ping = setInterval(() => ws.readyState === 1 && ws.send("ping"), 15000);
-  ws.onclose = () => clearInterval(ping);
-  return ws;
-}
+// The UI polls (see the dashboards) rather than holding a WebSocket, so it works
+// on serverless hosts such as Vercel that do not support long-lived sockets.

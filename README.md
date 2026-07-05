@@ -58,21 +58,23 @@ automated test suite.
 ```
 ┌──────────────────────────┐         REST + WebSocket        ┌───────────────────────────┐
 │   React dashboard (Vite)  │  ◀──────────────────────────▶  │   FastAPI backend          │
-│   Exercise Director UI    │   /api proxy · /ws live feed    │   simulation engine         │
+│   Exercise Director UI    │   /api  ·  polls for updates    │   simulation engine         │
 └──────────────────────────┘                                 │   + §4 guardrails           │
                                                              └────────────┬──────────────┘
                                                                           │
-                                                                 SQLite (SQLModel)
+                                                              SQLite (dev) / Postgres (cloud)
 ```
 
-- **Backend** — Python / FastAPI + SQLModel (SQLite). A background ticker emits
-  baseline SOC traffic every ~2s and fires scheduled events. Live updates are
-  pushed to the UI over a WebSocket.
-- **Frontend** — React (Vite). Talks to the backend through Vite's dev proxy
-  (`/api` → `:8000`, `/ws` → WebSocket), so there is no CORS friction in dev.
-- **No external services.** Password hashing (PBKDF2) and auth tokens (HMAC) use
-  only the Python standard library — nothing to phone home, which suits an
-  air-gapped deployment.
+- **Backend** — Python / FastAPI + SQLModel. Uses SQLite locally and Postgres
+  when a `DATABASE_URL` is set (e.g. on Vercel). A background ticker emits
+  baseline SOC traffic every ~2s and fires scheduled events; in serverless mode
+  (no long-lived process) that traffic is generated lazily on each poll instead.
+- **Frontend** — React (Vite). All routes live under `/api`; the UI **polls** for
+  updates (every ~2.5s) so it works identically in local dev and on serverless
+  hosts that don't support WebSockets.
+- **No external services for auth.** Password hashing (PBKDF2) and auth tokens
+  (HMAC) use only the Python standard library — nothing to phone home, which
+  suits an air-gapped deployment.
 
 ---
 
@@ -101,6 +103,36 @@ npm run dev
 ### 3. Log in
 Open the dashboard and sign in with any [demo account](#roles-rbac) — start with
 `director` / `director123`.
+
+---
+
+## Deploy to Vercel (demo hosting)
+
+The app is configured to deploy as a **single Vercel project** — the React app is
+served statically and the FastAPI backend runs as a Python serverless function
+under `/api`. Config lives in `vercel.json`, `api/index.py`, and `requirements.txt`.
+
+> **Note on fidelity.** The Spektek describes an *air-gapped, on-premise* range.
+> Public cloud hosting is for **demo/portfolio** only — it is the opposite of the
+> intended deployment model. Because serverless has no long-lived process, the
+> WebSocket live feed is replaced by short-interval **polling**, and baseline SOC
+> traffic is generated **lazily on each poll** instead of by a background ticker.
+
+**Steps:**
+1. Create a **Postgres** database (Vercel Postgres or [Neon](https://neon.tech) —
+   both free). Serverless has no persistent disk, so SQLite cannot be used.
+2. Import the GitHub repo into Vercel. Leave the build settings as detected —
+   `vercel.json` already sets the build command and output directory.
+3. Add these **Environment Variables** in the Vercel project:
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | your Postgres connection string (`postgres://…`) |
+   | `CYBERSIM_SECRET` | any long random string (signs auth tokens) |
+   | `CYBERSIM_BACKGROUND` | `0` (already forced off in the function) |
+4. Deploy. On first request the app creates its tables and seeds the demo users
+   automatically. The site serves the dashboard at `/` and the API at `/api/*`.
+
+Local development is unchanged and still uses SQLite — no database setup needed.
 
 ---
 

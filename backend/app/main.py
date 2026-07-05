@@ -9,11 +9,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 
-from . import events, guardrails, scenarios, soc
+from . import config, events, guardrails, scenarios, soc
 from .database import engine, init_db
 from .models import LogEntry, Scenario, ScenarioStatus
 from .realtime import hub
 from .routes import router
+
+
+def _ensure_ready() -> None:
+    """Create tables and (optionally) seed demo users. Idempotent."""
+    init_db()
+    if config.AUTO_SEED:
+        try:
+            from .seed import seed
+            seed(verbose=False)
+        except Exception as exc:  # never let seeding crash startup
+            print(f"[startup] auto-seed skipped: {exc}")
 
 _tick = 0
 
@@ -69,18 +80,21 @@ async def _simulation_loop() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
-    task = asyncio.create_task(_simulation_loop())
+    _ensure_ready()
+    task = None
+    if config.RUN_BACKGROUND:
+        task = asyncio.create_task(_simulation_loop())
     try:
         yield
     finally:
-        task.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await task
+        if task is not None:
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
 
 
 app = FastAPI(
-    title="Cyber Simulator — Defensive Cyber-Range",
+    title="Cyber Simulator Demo — Defensive Cyber-Range",
     description="MVP software prototype of the Spektek defensive cyber simulator.",
     version="0.1.0",
     lifespan=lifespan,
@@ -94,9 +108,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+# All API routes live under /api so a single Vercel deployment can serve the
+# static frontend at / and route /api/* to this function.
+app.include_router(router, prefix="/api")
 
 
+@app.get("/api/health", tags=["meta"])
 @app.get("/health", tags=["meta"])
 def health():
-    return {"status": "ok", "tick": _tick}
+    return {"status": "ok", "tick": _tick, "background": config.RUN_BACKGROUND}

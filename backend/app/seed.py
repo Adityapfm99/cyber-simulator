@@ -19,8 +19,9 @@ _DEMO_USERS = [
 ]
 
 
-def seed() -> None:
+def seed(verbose: bool = True) -> None:
     init_db()
+    created = 0
     with Session(engine) as session:
         for username, password, role in _DEMO_USERS:
             existing = session.exec(
@@ -32,8 +33,11 @@ def seed() -> None:
             session.add(User(
                 username=username, hashed_password=hashed, salt=salt, role=role,
             ))
+            created += 1
         session.commit()
-    print("Seeded demo users:")
+    if not verbose:
+        return
+    print(f"Seeded {created} new demo user(s):")
     for username, password, role in _DEMO_USERS:
         print(f"  {role.value:<18} {username} / {password}")
     print("\nStart the API:  uv run uvicorn app.main:app --reload --port 8000")

@@ -11,11 +11,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
-from . import aar, audit, c2, events, guardrails, scenarios, scoring
+from . import aar, audit, c2, config, events, guardrails, scenarios, scoring, soc
 from .auth import authenticate, create_token, get_current_user, require_roles
 from .database import get_session
 from .guardrails import GuardrailViolation
-from .models import Event, LogEntry, Role, Scenario, User
+from .models import Event, LogEntry, Role, Scenario, ScenarioStatus, User
 from .realtime import hub
 
 router = APIRouter()
@@ -246,6 +246,17 @@ def recent_logs(
     user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
+    # In serverless mode there is no background ticker, so lazily materialize
+    # baseline traffic and fire any due scheduled events on each poll.
+    if not config.RUN_BACKGROUND and not guardrails.is_kill_switch_engaged(session):
+        sc = session.get(Scenario, scenario_id)
+        if sc and sc.status == ScenarioStatus.RUNNING:
+            soc.lazy_fill(session, scenario_id)
+            for ev in events.due_scheduled(session):
+                try:
+                    events.inject(session, "scheduler", ev.id)
+                except Exception:
+                    pass
     rows = session.exec(
         select(LogEntry).where(LogEntry.scenario_id == scenario_id)
         .order_by(LogEntry.id.desc()).limit(limit)

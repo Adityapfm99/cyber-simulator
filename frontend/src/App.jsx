@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { A, login, logout, getToken, getRole, getUsername, openFeed } from "./api.js";
+import { A, login, logout, getToken, getRole, getUsername } from "./api.js";
 import TopologyGraph from "./TopologyGraph.jsx";
 import CommanderView from "./CommanderView.jsx";
+import Help from "./Help.jsx";
 
 const TARGETS = { TTD: 300, TTT: 600, TTC: 1800, TTR: 3600 };
 const CAN = {
@@ -18,8 +19,8 @@ function fmt(sec) {
 
 // --------------------------------------------------------------------------- //
 function Login({ onDone }) {
-  const [u, setU] = useState("director");
-  const [p, setP] = useState("director123");
+  const [u, setU] = useState("");
+  const [p, setP] = useState("");
   const [err, setErr] = useState("");
   const submit = async (e) => {
     e.preventDefault();
@@ -43,9 +44,7 @@ function Login({ onDone }) {
         </form>
         <div className="err">{err}</div>
         <div className="demo-hint">
-          Demo accounts:<br />
-          <code>admin/admin123</code> · <code>director/director123</code><br />
-          <code>analyst/analyst123</code> · <code>commander/commander123</code> · <code>observer/observer123</code>
+          Sign in with your assigned role credentials.
         </div>
       </div>
     </div>
@@ -278,7 +277,7 @@ function Dashboard({ onLogout }) {
   const [guardrails, setGuardrails] = useState({});
   const [toast, setToast] = useState("");
   const [err, setErr] = useState("");
-  const wsRef = useRef(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const canManage = CAN.manage.includes(role);
 
@@ -296,25 +295,16 @@ function Dashboard({ onLogout }) {
     setScenario(sc); setTopology(topo); setLogs(lg); setScoreboard(sb);
   }, []);
 
-  // Select scenario → load + open WS
+  // Select scenario → load, then poll for updates (works on serverless too).
   useEffect(() => {
     if (!selectedId) return;
     refreshScenario(selectedId);
-    if (wsRef.current) wsRef.current.close();
-    wsRef.current = openFeed(selectedId, (msg) => {
-      if (msg.kind === "log") setLogs((prev) => [...prev.slice(-250), msg.data]);
-      else if (msg.kind === "topology") setTopology(msg.data);
-      else if (msg.kind === "event") {
-        showToast(`⚡ Event injected: ${msg.data.title}`);
-        A.scoreboard(selectedId).then(setScoreboard);
-      } else if (msg.kind === "incident") A.scoreboard(selectedId).then(setScoreboard);
-      else if (msg.kind === "status") setScenario((s) => s ? { ...s, status: msg.data.status } : s);
-      else if (msg.kind === "killswitch") {
-        showToast("🛑 KILL SWITCH ENGAGED — all VMs halted");
-        loadGuardrails(); A.scenario(selectedId).then(setScenario);
-      }
-    });
-    return () => wsRef.current && wsRef.current.close();
+    loadGuardrails();
+    const id = setInterval(() => {
+      refreshScenario(selectedId);
+      loadGuardrails();
+    }, 2500);
+    return () => clearInterval(id);
   }, [selectedId]);
 
   const wrap = (fn) => async (...args) => {
@@ -356,6 +346,7 @@ function Dashboard({ onLogout }) {
         </span>
         <span className="spacer" style={{ flex: 1 }} />
         <span className="role-badge">{user} · {role}</span>
+        <button className="help-btn ghost" onClick={() => setShowHelp(true)}>📖 Guide</button>
         {CAN.manage.includes(role) && (
           <button className="danger" onClick={killSwitch}>
             {guardrails.kill_switch ? "Release Kill Switch" : "🛑 KILL SWITCH"}
@@ -363,6 +354,7 @@ function Dashboard({ onLogout }) {
         )}
         <button className="ghost" onClick={onLogout}>Logout</button>
       </div>
+      <Help open={showHelp} onClose={() => setShowHelp(false)} />
 
       <div className="layout">
         <div className="col">
