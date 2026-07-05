@@ -1,0 +1,97 @@
+// Thin API client. Token is kept in localStorage.
+const BASE = "/api";
+
+export function getToken() {
+  return localStorage.getItem("cybersim_token");
+}
+export function getRole() {
+  return localStorage.getItem("cybersim_role");
+}
+export function getUsername() {
+  return localStorage.getItem("cybersim_user");
+}
+
+function authHeaders(extra = {}) {
+  const t = getToken();
+  return t ? { Authorization: `Bearer ${t}`, ...extra } : extra;
+}
+
+async function handle(res) {
+  if (res.status === 401) {
+    logout();
+    throw new Error("Session expired — please log in again.");
+  }
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = body.detail || detail;
+    } catch {}
+    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+  }
+  const ct = res.headers.get("content-type") || "";
+  return ct.includes("application/json") ? res.json() : res;
+}
+
+export async function login(username, password) {
+  const body = new URLSearchParams({ username, password });
+  const res = await fetch(`${BASE}/auth/login`, { method: "POST", body });
+  const data = await handle(res);
+  localStorage.setItem("cybersim_token", data.access_token);
+  localStorage.setItem("cybersim_role", data.role);
+  localStorage.setItem("cybersim_user", data.username);
+  return data;
+}
+
+export function logout() {
+  localStorage.removeItem("cybersim_token");
+  localStorage.removeItem("cybersim_role");
+  localStorage.removeItem("cybersim_user");
+}
+
+export const api = {
+  get: (path) => fetch(`${BASE}${path}`, { headers: authHeaders() }).then(handle),
+  post: (path, body) =>
+    fetch(`${BASE}${path}`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }).then(handle),
+};
+
+// Endpoint helpers
+export const A = {
+  templates: () => api.get("/scenarios/templates"),
+  scenarios: () => api.get("/scenarios"),
+  createScenario: (template, name) => api.post("/scenarios", { template, name }),
+  scenario: (id) => api.get(`/scenarios/${id}`),
+  deploy: (id) => api.post(`/scenarios/${id}/deploy`),
+  destroy: (id) => api.post(`/scenarios/${id}/destroy`),
+  topology: (id) => api.get(`/scenarios/${id}/topology`),
+  events: (id) => api.get(`/scenarios/${id}/events`),
+  eventCatalog: () => api.get("/events/catalog"),
+  createEvent: (id, ev) => api.post(`/scenarios/${id}/events`, ev),
+  injectEvent: (eid) => api.post(`/events/${eid}/inject`),
+  logs: (id, limit = 150) => api.get(`/scenarios/${id}/logs?limit=${limit}`),
+  scoreboard: (id) => api.get(`/scenarios/${id}/scoreboard`),
+  advance: (incId, action) => api.post(`/incidents/${incId}/advance?action=${action}`),
+  guardrails: () => api.get("/admin/guardrails"),
+  killSwitch: (value) => api.post("/admin/kill-switch", { value }),
+  audit: (limit = 100) => api.get(`/admin/audit?limit=${limit}`),
+  auditVerify: () => api.get("/admin/audit/verify"),
+  aarUrl: (id) => `${BASE}/scenarios/${id}/aar.pdf`,
+};
+
+export function openFeed(scenarioId, onMessage) {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(`${proto}://${location.host}/ws/scenarios/${scenarioId}`);
+  ws.onmessage = (e) => {
+    try {
+      onMessage(JSON.parse(e.data));
+    } catch {}
+  };
+  // keepalive
+  const ping = setInterval(() => ws.readyState === 1 && ws.send("ping"), 15000);
+  ws.onclose = () => clearInterval(ping);
+  return ws;
+}

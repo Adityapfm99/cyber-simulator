@@ -1,0 +1,50 @@
+name: Enterprise SOC Defense
+description: >
+  A small enterprise network with a DMZ web tier, internal services, and SOC
+  tooling. Blue team defends against web exploitation, lateral movement, and a
+  dummy ransomware outbreak.
+nodes:
+  - name: fw-edge
+    kind: vm
+    role: firewall
+    ip: 10.10.0.1
+  - name: web-dmz
+    kind: container
+    role: web
+    ip: 10.10.1.10
+  - name: app-server
+    kind: vm
+    role: app
+    ip: 10.10.2.20
+  - name: db-server
+    kind: vm
+    role: db
+    ip: 10.10.2.30
+  - name: ad-dc
+    kind: vm
+    role: domain-controller
+    ip: 10.10.2.5
+  - name: workstation-01
+    kind: vm
+    role: endpoint
+    ip: 10.10.3.101
+  - name: workstation-02
+    kind: vm
+    role: endpoint
+    ip: 10.10.3.102
+  - name: siem
+    kind: vm
+    role: siem
+    ip: 10.10.9.9
+edges:
+  - [fw-edge, web-dmz]
+  - [web-dmz, app-server]
+  - [app-server, db-server]
+  - [app-server, ad-dc]
+  - [workstation-01, ad-dc]
+  - [workstation-02, ad-dc]
+  - [siem, fw-edge]
+  - [siem, ad-dc]
+traffic:
+  # dummy background traffic sources so the lab "looks alive"
+  baseline_lps: 6   # log lines per second across all sources

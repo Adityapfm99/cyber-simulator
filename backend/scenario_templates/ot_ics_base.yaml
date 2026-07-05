@@ -1,0 +1,43 @@
+name: OT/ICS Base Facility Digital Twin
+description: >
+  A digital twin of base facility OT (power + HVAC) with SCADA/HMI. Blue team
+  drills detection of an OT fault induced by a simulated cyberattack, plus C2
+  resilience under jamming and a supply-chain vendor anomaly.
+nodes:
+  - name: ot-firewall
+    kind: vm
+    role: firewall
+    ip: 172.16.0.1
+  - name: scada-hmi
+    kind: ot
+    role: hmi
+    ip: 172.16.10.10
+  - name: plc-power
+    kind: ot
+    role: plc-power
+    ip: 172.16.10.21
+  - name: plc-hvac
+    kind: ot
+    role: plc-hvac
+    ip: 172.16.10.22
+  - name: historian
+    kind: vm
+    role: historian
+    ip: 172.16.10.30
+  - name: c2-dashboard
+    kind: c2
+    role: leadership
+    ip: 172.16.20.5
+  - name: vendor-gw
+    kind: vendor
+    role: supply-chain
+    ip: 172.16.30.7
+edges:
+  - [ot-firewall, scada-hmi]
+  - [scada-hmi, plc-power]
+  - [scada-hmi, plc-hvac]
+  - [scada-hmi, historian]
+  - [c2-dashboard, historian]
+  - [vendor-gw, ot-firewall]
+traffic:
+  baseline_lps: 3
