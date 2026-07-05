@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
-from . import aar, audit, events, guardrails, scenarios, scoring
+from . import aar, audit, c2, events, guardrails, scenarios, scoring
 from .auth import authenticate, create_token, get_current_user, require_roles
 from .database import get_session
 from .guardrails import GuardrailViolation
@@ -132,6 +132,40 @@ def get_topology(
     session: Session = Depends(get_session),
 ):
     return scenarios.topology(session, scenario_id)
+
+
+@router.post("/scenarios/{scenario_id}/nodes/{node_name}/action", tags=["scenarios"])
+async def node_action(
+    scenario_id: int,
+    node_name: str,
+    action: str,
+    user: User = Depends(require_roles(Role.ADMIN, Role.ANALYST)),
+    session: Session = Depends(get_session),
+):
+    try:
+        result = scenarios.node_action(session, user.username, scenario_id, node_name, action)
+    except GuardrailViolation as exc:
+        raise _guard(exc)
+    await hub.publish(scenario_id, {"kind": "topology",
+                                    "data": scenarios.topology(session, scenario_id)})
+    for adv in result["incidents_advanced"]:
+        await hub.publish(scenario_id, {"kind": "incident", "data": adv})
+    return result
+
+
+# --------------------------------------------------------------------------- #
+# Commander C2 dashboard (§3 C2 Resilience & Supply Chain)
+# --------------------------------------------------------------------------- #
+@router.get("/scenarios/{scenario_id}/c2", tags=["c2"])
+def c2_dashboard(
+    scenario_id: int,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    try:
+        return c2.build_dashboard(session, scenario_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
 
 
 # --------------------------------------------------------------------------- #

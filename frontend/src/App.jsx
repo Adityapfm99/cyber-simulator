@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { A, login, logout, getToken, getRole, getUsername, openFeed } from "./api.js";
 import TopologyGraph from "./TopologyGraph.jsx";
+import CommanderView from "./CommanderView.jsx";
 
 const TARGETS = { TTD: 300, TTT: 600, TTC: 1800, TTR: 3600 };
 const CAN = {
@@ -237,6 +238,34 @@ function LogFeed({ logs }) {
 }
 
 // --------------------------------------------------------------------------- //
+function ContainmentPanel({ nodes, role, onAction }) {
+  if (!CAN.respond.includes(role)) return null;
+  const actionable = nodes.filter((n) =>
+    ["compromised", "quarantined"].includes(n.status));
+  return (
+    <div className="panel">
+      <h2>Containment</h2>
+      {actionable.length === 0 && (
+        <div className="empty">No compromised hosts. Nothing to contain.</div>
+      )}
+      {actionable.map((n) => (
+        <div key={n.id} className="row" style={{ padding: "5px 0", borderBottom: "1px solid #182230" }}>
+          <span style={{ fontWeight: 600 }}>{n.id}</span>
+          <span className={`status-tag status-${n.status === "compromised" ? "halted" : "destroyed"}`}
+            style={{ marginLeft: 8 }}>{n.status}</span>
+          <span style={{ flex: 1 }} />
+          {n.status === "compromised" ? (
+            <button onClick={() => onAction(n.id, "quarantine")}>Quarantine ▶</button>
+          ) : (
+            <button className="primary" onClick={() => onAction(n.id, "restore")}>Restore ▶</button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// --------------------------------------------------------------------------- //
 function Dashboard({ onLogout }) {
   const role = getRole();
   const user = getUsername();
@@ -302,6 +331,10 @@ function Dashboard({ onLogout }) {
   const deploy = wrap(async () => { await A.deploy(selectedId); await refreshScenario(selectedId); await loadScenarios(); });
   const destroy = wrap(async () => { await A.destroy(selectedId); await refreshScenario(selectedId); await loadScenarios(); });
   const advance = wrap(async (incId, action) => { await A.advance(incId, action); await A.scoreboard(selectedId).then(setScoreboard); });
+  const doNodeAction = wrap(async (node, action) => {
+    await A.nodeAction(selectedId, node, action);
+    await refreshScenario(selectedId);
+  });
   const killSwitch = wrap(async () => {
     const next = !guardrails.kill_switch;
     await A.killSwitch(next);
@@ -363,6 +396,7 @@ function Dashboard({ onLogout }) {
 
         <div className="col">
           {scenario && <EventPanel scenario={scenario} nodes={topology.nodes} onInject={() => refreshScenario(selectedId)} role={role} />}
+          <ContainmentPanel nodes={topology.nodes} role={role} onAction={doNodeAction} />
           <IncidentPanel scoreboard={scoreboard} role={role} onAdvance={advance} />
         </div>
       </div>
@@ -375,5 +409,7 @@ function Dashboard({ onLogout }) {
 export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
   if (!authed) return <Login onDone={() => setAuthed(true)} />;
-  return <Dashboard onLogout={() => { logout(); setAuthed(false); }} />;
+  const onLogout = () => { logout(); setAuthed(false); };
+  if (getRole() === "Commander") return <CommanderView onLogout={onLogout} />;
+  return <Dashboard onLogout={onLogout} />;
 }
