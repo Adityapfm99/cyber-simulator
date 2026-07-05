@@ -61,7 +61,7 @@ Spektek terdiri dari empat bagian:
 
 ## 4. Bagian 1 — Infrastruktur Hardware & Jaringan
 
-![Arsitektur Infrastruktur Cyber Range](infrastructure-topology.svg)
+![Arsitektur Infrastruktur Cyber Range](infrastructure-topology.png)
 
 *Gambar 1. Topologi infrastruktur cyber range: 4 compute node, All-Flash SAN,
 2 ToR switch (redundan/MLAG), NGFW, isolasi air-gap, dan segmentasi VLAN.*
