@@ -88,6 +88,30 @@ export default function Help({ open, onClose }) {
             <li>Everything is a harmless dummy — no real malware, identities, or credentials.</li>
           </ul>
         </div>
+
+        <div className="guide-section">
+          <h3>6 · Ransomware playbook <span className="role-note">MOD-05</span></h3>
+          <p style={{ fontSize: 12.5, margin: "0 0 6px" }}>
+            <b>Goal:</b> stop the spread, save the data, and restore operations as fast as
+            possible — <b>without paying the ransom</b>. Fast isolation + clean backups win.
+          </p>
+          <ol>
+            <li><b>Detect (TTD)</b> — <code>workstation-01</code> turns red; the SOC feed shows
+              critical logs: <code>mass_file_rename ext=.locked</code>,
+              <code>shadow_copy_delete</code>, <code>POST .../key</code>.</li>
+            <li><b>Triage (TTT)</b> — confirm it's ransomware, find patient-zero and how far it
+              has spread.</li>
+            <li><b>Contain (TTC)</b> ⭐ — in <b>Containment</b>, <b>Quarantine</b> the infected
+              host to isolate it from the network so encryption can't spread. If it's already
+              widespread, hit the <b>🛑 Kill Switch</b>.</li>
+            <li><b>Recover (TTR)</b> — <b>Restore</b> the host from a clean backup → status
+              returns to UP.</li>
+          </ol>
+          <p style={{ fontSize: 12, color: "var(--muted)", margin: "4px 0 0" }}>
+            Principles drilled: never pay the ransom · keep tested clean backups · isolate
+            first, then eradicate and recover (don't restore before contained).
+          </p>
+        </div>
       </div>
     </div>
   );
