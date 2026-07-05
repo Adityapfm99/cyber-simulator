@@ -45,7 +45,26 @@ export default function Help({ open, onClose }) {
         </div>
 
         <div className="guide-section">
-          <h3>3 · Training modules <span className="role-note">top bar buttons</span></h3>
+          <h3>3 · Incidents &amp; Scoring <span className="role-note">what "avg 0/100" means</span></h3>
+          <p style={{ fontSize: 12.5, margin: "0 0 6px" }}>
+            Every injected attack opens an <b>incident</b>. The platform scores how fast the
+            blue team responds, from <b>0 to 100</b> — 25 points for each phase completed
+            within its target time:
+          </p>
+          <ul>
+            <li><b>TTD</b> Time to Detect · <b>TTT</b> Time to Triage · <b>TTC</b> Time to
+              Contain · <b>TTR</b> Time to Recover (25 pts each).</li>
+            <li><b>avg 0/100</b> just means the incident isn't responded to yet — normal for a
+              fresh attack. "No incidents" means that scenario hasn't been attacked.</li>
+            <li><b>Raise the score</b> (SOC Analyst): in the <b>Incidents</b> panel click
+              <b> detect → triage → contain → recover</b> (25 → 50 → 75 → 100), or use the
+              <b> Containment</b> panel (Quarantine → Restore) which auto-contains and recovers.</li>
+            <li>The final scores feed the <b>AAR</b> report as the team's performance measure.</li>
+          </ul>
+        </div>
+
+        <div className="guide-section">
+          <h3>4 · Training modules <span className="role-note">top bar buttons</span></h3>
           <ul>
             <li><b>🕸 Web Sec Lab</b> (MOD-02): a deliberately-vulnerable web app (OWASP
               Top 10 — SQLi, XSS, IDOR, command injection, data exposure), all sandboxed
@@ -60,7 +79,7 @@ export default function Help({ open, onClose }) {
         </div>
 
         <div className="guide-section">
-          <h3>4 · Commander &amp; safety</h3>
+          <h3>5 · Commander &amp; safety</h3>
           <ul>
             <li><b>Commander</b> sees a C2 leadership dashboard. Inject a <code>c2_jamming</code>
               event to see the situational feed become stale and conflicting.</li>
