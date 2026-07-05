@@ -92,7 +92,7 @@ Spektek terdiri dari empat bagian:
 | PLT-01 | Exercise Director Dashboard | Multi-tenant / multi-skenario, tampilan terpusat |
 | PLT-02 | Injeksi event | Manual maupun terjadwal (scheduled) |
 | PLT-03 | Visualisasi topologi | Real-time, status node (sehat/compromised/quarantined) |
-| PLT-04 | Scenario Engine & Workflow Runner | Deploy/destroy lab gaya Infrastructure-as-Code, < 15 menit |
+| PLT-04 | Scenario Engine & Workflow Runner | Deploy/destroy lab gaya Infrastructure-as-Code|
 | PLT-05 | Dummy traffic | Traffic pengguna palsu agar lab tampak "hidup" |
 | PLT-06 | Scoring Engine | Menangkap metrik insiden TTD/TTT/TTC/TTR secara otomatis |
 | PLT-07 | AAR (After-Action Review) | Laporan akhir PDF/Word + timeline + analisis gap SOP |
@@ -166,3 +166,51 @@ Lingkup yang diharapkan dari mitra teknis/penyedia:
 4. Kill switch menghentikan seluruh node; isolasi menolak routing internet / IP publik.
 5. RBAC menegakkan pemisahan peran; log audit lolos verifikasi integritas.
 6. Tidak ada malware/identitas/kredensial nyata yang dapat dimasukkan (ditolak guardrail).
+
+---
+
+## 11. Estimasi Biaya / Ringkasan Investasi (Investment Summary)
+
+> **Catatan penting:** Angka di bawah adalah **estimasi indikatif** berbasis harga acuan pasar 2025–2026 untuk perangkat kelas enterprise
+> Belum termasuk bea masuk/impor, pengiriman, serta pekerjaan sipil (ruang, kelistrikan, pendingin).
+
+### 11.1 Perangkat Keras (Hardware) — CAPEX
+
+*Harga sudah termasuk buffer estimasi*
+
+| Item | Qty | Est. satuan (USD) | Est. total (Rp) |
+|---|---:|---:|---:|
+| Compute node (2 × 32-core, 1 TB RAM) — kelas Dell R760 / setara | 4 | 28.750 | 1.840.000.000 |
+| All-flash SAN ≥ 50 TB — kelas Dell PowerStore 500T / setara | 1 | 103.500 | 1.656.000.000 |
+| ToR switch 10/25 GbE (redundan/MLAG) — kelas Arista 7050SX / setara | 2 | 13.800 | 441.600.000 |
+| NGFW (kontrol egress) — kelas FortiGate/PA data-center | 1 | 34.500 | 552.000.000 |
+| Rack, UPS, PDU, KVM, optik/transceiver & kabel | 1 lot | 20.700 | 331.200.000 |
+| **Subtotal Hardware** | | | **4.820.800.000** |
+
+### 11.2 Perangkat Lunak, Implementasi & Jasa
+
+| Item | Est. total (Rp) |
+|---|---:|
+| Pengembangan/kustomisasi platform + modul skenario (SOC, Web, OT/ICS, C2, Ransomware) | 250.000.000 |
+| Instalasi, konfigurasi & deployment infrastruktur | 100.000.000 |
+| Integrasi & pengujian (FAT / SAT / UAT) | 80.000.000 |
+| Pelatihan & dokumentasi serah terima | 70.000.000 |
+| **Subtotal Software + Implementasi & Jasa** | **500.000.000** |
+
+### 11.3 Ringkasan Total
+
+| Komponen | Est. (Rp) |
+|---|---:|
+| Perangkat Keras (Hardware, termasuk buffer) | 4.820.800.000 |
+| Perangkat Lunak, Implementasi & Jasa | 500.000.000 |
+| **Total** | **5.320.800.000** |
+
+**Biaya berulang (OPEX) — opsional, per tahun:**
+
+| Item | Est. per tahun (Rp) |
+|---|---:|
+| Dukungan, pemeliharaan HW & patching platform | ± 50.000.000 |
+
+*Estimasi durasi implementasi: **± 3–4 bulan** (pengadaan → instalasi → deployment → pengujian  pelatihan → go-live).*
+
+---
