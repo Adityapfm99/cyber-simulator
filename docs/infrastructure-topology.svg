@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 780" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/>
+    </marker>
+    <linearGradient id="srvHead" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <style>
+      .lbl{fill:#0f172a;font-size:13px}
+      .sub{fill:#475569;font-size:11px}
+      .devt{fill:#ffffff;font-size:12px;font-weight:600}
+      .devs{fill:#cbd5e1;font-size:10px}
+      .zone{fill:#334155;font-size:13px;font-weight:700}
+      .link{stroke:#94a3b8;stroke-width:2}
+      .rlink{stroke:#ef4444;stroke-width:2;stroke-dasharray:5 4}
+    </style>
+  </defs>
+
+  <rect x="6" y="6" width="948" height="768" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="480" y="36" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">
+    Arsitektur Infrastruktur Cyber Range — Spektek §1</text>
+  <text x="480" y="56" text-anchor="middle" class="sub">Self-hosted · Air-Gapped · On-Premise di Fasilitas Instansi</text>
+
+  <!-- Excluded: production / internet -->
+  <rect x="330" y="74" width="300" height="52" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="480" y="97" text-anchor="middle" class="lbl" font-weight="600">Jaringan Produksi / Internet</text>
+  <text x="480" y="114" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="600">DI LUAR LINGKUP — tidak terhubung</text>
+  <circle cx="352" cy="100" r="12" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+  <line x1="344" y1="108" x2="360" y2="92" stroke="#ef4444" stroke-width="2.5"/>
+
+  <!-- Air-gap barrier -->
+  <line x1="60" y1="150" x2="900" y2="150" class="rlink"/>
+  <rect x="330" y="138" width="300" height="24" rx="12" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="480" y="154" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="700">🔒 AIR-GAP · TIDAK ADA RUTING INTERNET</text>
+
+  <!-- blocked link production -> NGFW -->
+  <line x1="480" y1="126" x2="480" y2="138" class="rlink"/>
+
+  <!-- NGFW -->
+  <rect x="410" y="176" width="140" height="56" rx="8" fill="#7c2d12"/>
+  <path d="M480,184 l16,6 v8 c0,10 -8,16 -16,20 c-8,-4 -16,-10 -16,-20 v-8 Z" fill="#fb923c" opacity="0.9"/>
+  <text x="480" y="200" text-anchor="middle" class="devt">NGFW</text>
+  <text x="480" y="224" text-anchor="middle" class="devs">Egress control · egress DITOLAK</text>
+
+  <!-- Lab zone -->
+  <rect x="40" y="256" width="880" height="500" rx="12" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+  <text x="62" y="282" class="zone" fill="#047857">CYBER RANGE LAB — TERISOLASI (VLAN-segmented)</text>
+
+  <!-- NGFW down to switches -->
+  <line x1="480" y1="232" x2="480" y2="316" class="link"/>
+
+  <!-- ToR switches -->
+  <g>
+    <rect x="250" y="318" width="210" height="46" rx="6" fill="#0f766e"/>
+    <text x="355" y="337" text-anchor="middle" class="devt">ToR Switch-1</text>
+    <text x="355" y="353" text-anchor="middle" class="devs">10/25 GbE</text>
+    <g fill="#5eead4">
+      <rect x="262" y="356" width="8" height="5"/><rect x="274" y="356" width="8" height="5"/>
+      <rect x="286" y="356" width="8" height="5"/><rect x="298" y="356" width="8" height="5"/>
+      <rect x="310" y="356" width="8" height="5"/><rect x="322" y="356" width="8" height="5"/>
+    </g>
+  </g>
+  <g>
+    <rect x="500" y="318" width="210" height="46" rx="6" fill="#0f766e"/>
+    <text x="605" y="337" text-anchor="middle" class="devt">ToR Switch-2</text>
+    <text x="605" y="353" text-anchor="middle" class="devs">10/25 GbE (redundan)</text>
+    <g fill="#5eead4">
+      <rect x="512" y="356" width="8" height="5"/><rect x="524" y="356" width="8" height="5"/>
+      <rect x="536" y="356" width="8" height="5"/><rect x="548" y="356" width="8" height="5"/>
+      <rect x="560" y="356" width="8" height="5"/><rect x="572" y="356" width="8" height="5"/>
+    </g>
+  </g>
+  <!-- MLAG cross-link -->
+  <line x1="460" y1="341" x2="500" y2="341" stroke="#0f766e" stroke-width="2.5"/>
+  <text x="480" y="334" text-anchor="middle" fill="#0f766e" font-size="9" font-weight="700">MLAG</text>
+
+  <!-- Compute nodes -->
+  <g>
+    <!-- node template repeated -->
+    <!-- NODE 1 -->
+    <rect x="66" y="430" width="160" height="96" rx="8" fill="#1e293b"/>
+    <rect x="66" y="430" width="160" height="22" rx="8" fill="url(#srvHead)"/>
+    <text x="146" y="446" text-anchor="middle" class="devt">COMPUTE NODE-1</text>
+    <text x="146" y="472" text-anchor="middle" class="devs">2 × 32-core CPU</text>
+    <text x="146" y="488" text-anchor="middle" class="devs">1 TB RAM</text>
+    <text x="146" y="512" text-anchor="middle" fill="#38bdf8" font-size="10">ratusan VM / container</text>
+    <!-- NODE 2 -->
+    <rect x="242" y="430" width="160" height="96" rx="8" fill="#1e293b"/>
+    <rect x="242" y="430" width="160" height="22" rx="8" fill="url(#srvHead)"/>
+    <text x="322" y="446" text-anchor="middle" class="devt">COMPUTE NODE-2</text>
+    <text x="322" y="472" text-anchor="middle" class="devs">2 × 32-core CPU</text>
+    <text x="322" y="488" text-anchor="middle" class="devs">1 TB RAM</text>
+    <text x="322" y="512" text-anchor="middle" fill="#38bdf8" font-size="10">ratusan VM / container</text>
+    <!-- NODE 3 -->
+    <rect x="418" y="430" width="160" height="96" rx="8" fill="#1e293b"/>
+    <rect x="418" y="430" width="160" height="22" rx="8" fill="url(#srvHead)"/>
+    <text x="498" y="446" text-anchor="middle" class="devt">COMPUTE NODE-3</text>
+    <text x="498" y="472" text-anchor="middle" class="devs">2 × 32-core CPU</text>
+    <text x="498" y="488" text-anchor="middle" class="devs">1 TB RAM</text>
+    <text x="498" y="512" text-anchor="middle" fill="#38bdf8" font-size="10">ratusan VM / container</text>
+    <!-- NODE 4 -->
+    <rect x="594" y="430" width="160" height="96" rx="8" fill="#1e293b"/>
+    <rect x="594" y="430" width="160" height="22" rx="8" fill="url(#srvHead)"/>
+    <text x="674" y="446" text-anchor="middle" class="devt">COMPUTE NODE-4</text>
+    <text x="674" y="472" text-anchor="middle" class="devs">2 × 32-core CPU</text>
+    <text x="674" y="488" text-anchor="middle" class="devs">1 TB RAM</text>
+    <text x="674" y="512" text-anchor="middle" fill="#38bdf8" font-size="10">ratusan VM / container</text>
+  </g>
+
+  <!-- All-flash SAN -->
+  <rect x="770" y="422" width="130" height="112" rx="8" fill="#312e81"/>
+  <text x="835" y="444" text-anchor="middle" class="devt">ALL-FLASH SAN</text>
+  <text x="835" y="462" text-anchor="middle" class="devs">≥ 50 TB usable</text>
+  <text x="835" y="477" text-anchor="middle" class="devs">High IOPS</text>
+  <g fill="#818cf8">
+    <rect x="786" y="490" width="98" height="8" rx="2"/>
+    <rect x="786" y="502" width="98" height="8" rx="2"/>
+    <rect x="786" y="514" width="98" height="8" rx="2"/>
+  </g>
+
+  <!-- Links: each node + SAN dual-homed to both switches -->
+  <g class="link" fill="none">
+    <path d="M146,430 C146,395 330,390 340,364"/>
+    <path d="M146,430 C146,400 560,392 590,364"/>
+    <path d="M322,430 C322,400 350,392 355,364"/>
+    <path d="M322,430 C322,400 560,392 600,364"/>
+    <path d="M498,430 C498,400 380,392 360,364"/>
+    <path d="M498,430 C498,400 600,392 605,364"/>
+    <path d="M674,430 C674,400 380,392 355,364"/>
+    <path d="M674,430 C674,400 610,392 610,364"/>
+    <path d="M835,422 C835,392 620,388 610,364"/>
+    <path d="M835,422 C835,388 470,384 360,364"/>
+  </g>
+
+  <!-- Operator consoles -->
+  <rect x="66" y="600" width="500" height="120" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="86" y="624" class="lbl" font-weight="700">Konsol Operator (VLAN 99 · Manajemen)</text>
+  <g>
+    <rect x="86" y="638" width="150" height="64" rx="6" fill="#0f172a"/>
+    <text x="161" y="662" text-anchor="middle" class="devt">Exercise</text>
+    <text x="161" y="678" text-anchor="middle" class="devt">Director</text>
+    <rect x="252" y="638" width="150" height="64" rx="6" fill="#0f172a"/>
+    <text x="327" y="662" text-anchor="middle" class="devt">SOC Analyst</text>
+    <text x="327" y="678" text-anchor="middle" class="devs">Stations</text>
+    <rect x="418" y="638" width="130" height="64" rx="6" fill="#0f172a"/>
+    <text x="483" y="662" text-anchor="middle" class="devt">Commander</text>
+    <text x="483" y="678" text-anchor="middle" class="devs">C2 Console</text>
+  </g>
+  <!-- console uplink to switches -->
+  <path d="M300,600 C300,560 420,470 460,364" class="link" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- VLAN legend -->
+  <rect x="600" y="600" width="300" height="120" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="620" y="624" class="lbl" font-weight="700">Segmentasi VLAN (isolasi ketat)</text>
+  <rect x="620" y="636" width="14" height="14" rx="3" fill="#ef4444"/>
+  <text x="642" y="648" class="sub">VLAN 10 — Target Range (VM skenario)</text>
+  <rect x="620" y="658" width="14" height="14" rx="3" fill="#2563eb"/>
+  <text x="642" y="670" class="sub">VLAN 20 — SOC / Monitoring (SIEM)</text>
+  <rect x="620" y="680" width="14" height="14" rx="3" fill="#10b981"/>
+  <text x="642" y="692" class="sub">VLAN 99 — Manajemen / Exercise Control</text>
+  <text x="620" y="712" fill="#64748b" font-size="10">NGFW menegakkan kontrol egress; tidak ada rute ke internet.</text>
+</svg>

@@ -47,9 +47,19 @@ while the system scores their performance and produces an After-Action Review.
 | §4 RBAC + Immutable Audit | 5 separated roles + a hash-chained, tamper-evident audit log | ✅ |
 | §1 Hardware / Network | Documentation only (see `docs/`) | 📄 |
 
-**Not yet built** (candidate next slices): Commander C2-resilience dashboard,
-Web Security Lab (real vulnerable containers), OT/ICS gauge failure animation,
-automated test suite.
+**Not yet built** (candidate next slices): Web Security Lab (real vulnerable
+containers), OT/ICS gauge failure animation, Word export for the AAR, automated
+test suite.
+
+## Documentation (`docs/`)
+
+| File | Isi |
+|---|---|
+| [`docs/spektek.md`](docs/spektek.md) | Dokumen Spesifikasi Teknis formal (4 bagian + kode requirement + kesesuaian) |
+| [`docs/infrastructure.md`](docs/infrastructure.md) | Desain infrastruktur §1 + diagram topologi |
+| [`docs/infrastructure-topology.svg`](docs/infrastructure-topology.svg) | Diagram SVG: server–SAN–switch–NGFW + isolasi jaringan |
+| [`docs/dashboard-mockup.md`](docs/dashboard-mockup.md) | Penjelasan mockup dashboard |
+| [`docs/dashboard-mockup.html`](docs/dashboard-mockup.html) | Mockup Exercise Director Dashboard (buka di browser) |
 
 ---
 

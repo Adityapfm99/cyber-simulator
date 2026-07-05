@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Exercise Director Dashboard — Mockup</title>
+<style>
+  :root{
+    --bg:#0b0f14;--panel:#121821;--panel2:#0e141c;--border:#223041;--text:#d7e0ea;
+    --muted:#7d8ea1;--accent:#35d0a5;--accent2:#4aa3ff;--warn:#f5a623;--crit:#ff5c5c;--ok:#35d0a5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;font-size:14px}
+  .topbar{display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
+  .topbar h1{font-size:15px;margin:0;letter-spacing:.5px}
+  .pill{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+  .pill.on{color:var(--ok);border-color:var(--ok)}
+  .role{font-size:12px;color:var(--accent2);font-weight:600}
+  .btn{font:inherit;border:1px solid var(--border);background:#1a2230;color:var(--text);padding:7px 12px;border-radius:6px;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#04140f;border-color:var(--accent);font-weight:600}
+  .btn.danger{background:var(--crit);color:#1a0000;border-color:var(--crit);font-weight:700}
+  .btn.ghost{background:transparent}
+  .layout{display:grid;grid-template-columns:270px 1fr 320px;gap:12px;padding:12px}
+  .col{display:flex;flex-direction:column;gap:12px}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px}
+  .panel h2{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 10px}
+  .sc{padding:8px;border:1px solid var(--border);border-radius:7px;margin-bottom:7px}
+  .sc.active{border-color:var(--accent);background:#10201a}
+  .sc .n{font-weight:600}
+  .sc .m{font-size:11px;color:var(--muted)}
+  .tag{font-size:10px;padding:2px 7px;border-radius:5px;text-transform:uppercase}
+  .t-run{background:#10281f;color:var(--ok)} .t-draft{background:#2a3342;color:var(--muted)}
+  .row{display:flex;align-items:center;gap:8px}
+  .sp{flex:1}
+  .log{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;padding:3px 6px;border-bottom:1px solid #182230;display:flex;gap:8px}
+  .lsrc{color:var(--accent2);width:60px;flex-shrink:0}
+  .warn{background:#1e1a0e} .warn .lm{color:var(--warn)}
+  .crit{background:#2a1010} .crit .lm{color:var(--crit);font-weight:600}
+  .inc{border:1px solid var(--border);border-radius:7px;padding:9px;margin-bottom:8px}
+  .inc .title{font-weight:600;font-size:12.5px;margin-bottom:6px}
+  .mets{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:6px 0}
+  .met{text-align:center;background:var(--panel2);border-radius:5px;padding:4px}
+  .met .k{font-size:9px;color:var(--muted)} .met .v{font-size:12px;font-weight:600}
+  .met.met .v{color:var(--ok)} .met.miss .v{color:var(--warn)}
+  .score{font-size:22px;font-weight:700;color:var(--ok)}
+  .field{display:grid;gap:5px;margin-bottom:10px}
+  .field label{font-size:11px;color:var(--muted)}
+  select,input{font:inherit;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+  .banner{font-size:11px;color:var(--muted);text-align:center;padding:6px;border-top:1px solid var(--border)}
+  .cap{max-width:1000px;margin:0 auto;padding:10px 12px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="cap">📸 <b>Mockup</b> — Exercise Director Dashboard (statis, data contoh). Tampilan aktual bersifat real-time.</div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <h1>🛡️ CYBER SIMULATOR</h1>
+    <span class="pill on">ISOLATED ✓</span>
+    <span class="pill on">SYSTEMS NOMINAL</span>
+    <span class="sp"></span>
+    <span class="role">director · Exercise Director</span>
+    <button class="btn ghost">📖 Guide</button>
+    <button class="btn danger">🛑 KILL SWITCH</button>
+    <button class="btn ghost">Logout</button>
+  </div>
+
+  <div class="layout">
+    <!-- Left: scenarios -->
+    <div class="col">
+      <div class="panel">
+        <h2>Scenarios</h2>
+        <div class="sc active">
+          <div class="row"><span class="n">Enterprise SOC Defense — Demo</span><span class="sp"></span><span class="tag t-run">running</span></div>
+          <div class="m">#1 · enterprise_soc · by director</div>
+        </div>
+        <div class="sc">
+          <div class="row"><span class="n">OT Base — Commander Demo</span><span class="sp"></span><span class="tag t-run">running</span></div>
+          <div class="m">#2 · ot_ics_base · by director</div>
+        </div>
+        <div class="sc">
+          <div class="row"><span class="n">Ransomware Drill</span><span class="sp"></span><span class="tag t-draft">draft</span></div>
+          <div class="m">#3 · enterprise_soc · by admin</div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:6px">
+          <div class="field"><label>New exercise from template</label>
+            <select><option>Enterprise SOC Defense</option><option>OT/ICS Base</option></select></div>
+          <button class="btn primary" style="width:100%">+ Create scenario</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: topology + feed -->
+    <div class="col">
+      <div class="panel row">
+        <div><div style="font-weight:600">Enterprise SOC Defense — Demo</div>
+          <div style="font-size:11px;color:var(--muted)">enterprise_soc · running</div></div>
+        <span class="sp"></span>
+        <button class="btn primary">Deploy</button><button class="btn">Destroy</button><button class="btn ghost">AAR ↓</button>
+      </div>
+
+      <div class="panel">
+        <h2>Live Topology</h2>
+        <svg viewBox="0 0 560 380" width="100%">
+          <!-- edges -->
+          <g stroke="#26374a" stroke-width="1.5">
+            <line x1="280" y1="60" x2="470" y2="150"/><line x1="470" y1="150" x2="430" y2="300"/>
+            <line x1="430" y1="300" x2="130" y2="300"/><line x1="130" y1="300" x2="90" y2="150"/>
+            <line x1="90" y1="150" x2="280" y2="60"/><line x1="280" y1="60" x2="280" y2="190"/>
+            <line x1="280" y1="190" x2="470" y2="150"/><line x1="280" y1="190" x2="130" y2="300"/>
+          </g>
+          <!-- nodes -->
+          <g font-size="16" text-anchor="middle">
+            <circle cx="280" cy="60" r="20" fill="#121821" stroke="#35d0a5" stroke-width="2"/><text x="280" y="65">🛡️</text>
+            <text x="280" y="34" font-size="10" fill="#d7e0ea">fw-edge</text><text x="280" y="94" font-size="8" fill="#35d0a5">up</text>
+
+            <circle cx="470" cy="150" r="20" fill="#121821" stroke="#35d0a5" stroke-width="2"/><text x="470" y="155">🖥️</text>
+            <text x="470" y="124" font-size="10" fill="#d7e0ea">web-dmz</text><text x="470" y="184" font-size="8" fill="#35d0a5">up</text>
+
+            <circle cx="430" cy="300" r="20" fill="#121821" stroke="#35d0a5" stroke-width="2"/><text x="430" y="305">🖥️</text>
+            <text x="430" y="274" font-size="10" fill="#d7e0ea">db-server</text><text x="430" y="332" font-size="8" fill="#35d0a5">up</text>
+
+            <circle cx="130" cy="300" r="24" fill="#121821" stroke="#ff5c5c" stroke-width="3"/><text x="130" y="306">🖥️</text>
+            <text x="130" y="270" font-size="10" fill="#d7e0ea">workstation-01</text><text x="130" y="338" font-size="8" fill="#ff5c5c">compromised</text>
+
+            <circle cx="90" cy="150" r="20" fill="#121821" stroke="#35d0a5" stroke-width="2"/><text x="90" y="155">🖥️</text>
+            <text x="90" y="124" font-size="10" fill="#d7e0ea">ad-dc</text><text x="90" y="184" font-size="8" fill="#35d0a5">up</text>
+
+            <circle cx="280" cy="190" r="20" fill="#121821" stroke="#4aa3ff" stroke-width="2"/><text x="280" y="195">📊</text>
+            <text x="280" y="228" font-size="10" fill="#d7e0ea">siem</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="panel">
+        <h2>SOC / SIEM Live Feed</h2>
+        <div class="log"><span class="lsrc">firewall</span><span class="lm">ACCEPT tcp 10.10.3.101:1099 -&gt; 10.10.1.10:443 policy=allow-web</span></div>
+        <div class="log"><span class="lsrc">dns</span><span class="lm">query 10.10.2.5 name=update.internal.lab type=A rcode=NOERROR</span></div>
+        <div class="log crit"><span class="lsrc">edr</span><span class="lm">mass_file_rename host=10.10.3.101 ext=.locked rate=high (DUMMY drill)</span></div>
+        <div class="log crit"><span class="lsrc">edr</span><span class="lm">shadow_copy_delete host=10.10.3.101 (DUMMY drill)</span></div>
+        <div class="log warn"><span class="lsrc">proxy</span><span class="lm">POST http://drop.lab/key host=10.10.3.101 blocked=true</span></div>
+        <div class="log"><span class="lsrc">edr</span><span class="lm">process_start host=10.10.2.20 image=svchost.exe signed=true</span></div>
+      </div>
+    </div>
+
+    <!-- Right: inject + containment + scoring -->
+    <div class="col">
+      <div class="panel">
+        <h2>Inject Event</h2>
+        <div class="field"><label>Attack type (dummy)</label>
+          <select><option>ransomware</option><option>ot_fault</option><option>c2_jamming</option></select></div>
+        <div class="field"><label>Target node</label>
+          <select><option>workstation-01 (endpoint)</option><option>web-dmz (web)</option></select></div>
+        <button class="btn primary">⚡ Inject now</button>
+      </div>
+
+      <div class="panel">
+        <h2>Containment</h2>
+        <div class="row" style="padding:5px 0;border-bottom:1px solid #182230">
+          <span style="font-weight:600">workstation-01</span>
+          <span class="tag" style="background:#3a1414;color:#ff5c5c;margin-left:8px">compromised</span>
+          <span class="sp"></span><button class="btn">Quarantine ▶</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Incidents &amp; Scoring · avg 75/100</h2>
+        <div class="inc">
+          <div class="row"><span class="title">ransomware: Ransomware outbreak</span><span class="sp"></span><span class="score">75</span></div>
+          <div class="mets">
+            <div class="met met"><div class="k">TTD</div><div class="v">1m12s</div></div>
+            <div class="met met"><div class="k">TTT</div><div class="v">3m40s</div></div>
+            <div class="met miss"><div class="k">TTC</div><div class="v">—</div></div>
+            <div class="met miss"><div class="k">TTR</div><div class="v">—</div></div>
+          </div>
+          <div class="row"><span class="tag t-run">triaged</span><span class="sp"></span><button class="btn primary">contain ▶</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="banner">Dummy data only — no real malware, identities, or credentials · RBAC + immutable audit enforced (Spektek §4)</div>
+</body>
+</html>
