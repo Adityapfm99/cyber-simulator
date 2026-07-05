@@ -1,5 +1,5 @@
 # Spesifikasi Teknis (Spektek)
-## Defensive Cyber Simulator — Cyber Range Pelatihan Tim Biru
+## Defensive Cyber Simulator — Cyber Range Pelatihan Tim Pertahanan Siber (Blue Team)
 
 | | |
 |---|---|
@@ -124,7 +124,7 @@ Spektek terdiri dari empat bagian:
 
 | ID | Requirement | Deskripsi |
 |---|---|---|
-| KMN-01 | Isolasi ketat | Tolak semua ruting internet |
+| KMN-01 | Isolasi ketat | Tolak semua routing internet |
 | KMN-02 | Kill switch | Satu sakelar darurat (fisik/logis) mematikan seluruh VM latihan seketika |
 | KMN-03 | Dummy data enforcement | Larang malware nyata, identitas personel nyata, kredensial nyata, dan peta jaringan militer nyata; hanya parameter berbasis allowlist |
 | KMN-04 | RBAC | Pemisahan peran ketat: Admin, Exercise Director, Commander, SOC Analyst, Observer |
@@ -163,6 +163,6 @@ Lingkup yang diharapkan dari mitra teknis/penyedia:
 1. Exercise Director dapat membuat, men-deploy, dan menghancurkan minimal 2 template skenario.
 2. Injeksi serangan dummy memunculkan log SIEM & membuka insiden yang ter-skor.
 3. Metrik TTD/TTT/TTC/TTR tercatat dan laporan AAR dapat diunduh.
-4. Kill switch menghentikan seluruh node; isolasi menolak ruting internet / IP publik.
+4. Kill switch menghentikan seluruh node; isolasi menolak routing internet / IP publik.
 5. RBAC menegakkan pemisahan peran; log audit lolos verifikasi integritas.
 6. Tidak ada malware/identitas/kredensial nyata yang dapat dimasukkan (ditolak guardrail).

@@ -19,7 +19,7 @@ perangkat keras), jadi didokumentasikan sebagai desain acuan. Isolasi jaringanny
 | **Compute** | ≥ 4 node server enterprise, masing-masing 2 × 32-core CPU, 1 TB RAM | Menjalankan ratusan VM/container sebagai target skenario |
 | **Storage** | SAN all-flash, ≥ 50 TB usable, high IOPS | Image VM, snapshot, log/telemetri exercise |
 | **Switching** | 2 × ToR switch 10/25 GbE (redundan, MLAG) | Backbone lab, dual-homing compute & storage |
-| **Security** | 1 × NGFW | Kontrol egress; menegakkan larangan ruting internet |
+| **Security** | 1 × NGFW | Kontrol egress; menegakkan larangan routing internet |
 | **Isolasi** | Air-gap + segmentasi VLAN ketat | Pemisahan total dari jaringan produksi/internet |
 
 ## Segmentasi VLAN
@@ -33,7 +33,7 @@ perangkat keras), jadi didokumentasikan sebagai desain acuan. Isolasi jaringanny
 ## Prinsip keamanan (mengikat ke §4)
 
 - **Air-gap**: lab terputus fisik/logis dari internet dan jaringan produksi. NGFW
-  berada di batas dan **menolak semua ruting egress** — tidak ada jalur keluar.
+  berada di batas dan **menolak semua routing egress** — tidak ada jalur keluar.
 - **Redundansi**: dua ToR switch dengan MLAG; compute & SAN dual-homed agar tidak
   ada single point of failure saat exercise berjalan.
 - **Kill switch**: mekanisme darurat (fisik/logis) untuk mematikan seluruh VM
@@ -45,7 +45,7 @@ Meskipun hardware di luar lingkup kode, platform software **memodelkan** batas-b
 ini agar aman:
 
 - Guardrail isolasi menolak alamat IP publik/routable — hanya rentang privat
-  RFC1918 yang boleh muncul di topologi lab (setara "tidak ada ruting internet").
+  RFC1918 yang boleh muncul di topologi lab (setara "tidak ada routing internet").
 - Kill switch di aplikasi menghentikan seluruh node skenario (setara sakelar
   darurat fisik).
 - Segmentasi peran (VLAN 99) tercermin sebagai RBAC 5 peran di aplikasi.
