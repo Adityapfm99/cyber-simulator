@@ -112,6 +112,36 @@ export default function Help({ open, onClose }) {
             first, then eradicate and recover (don't restore before contained).
           </p>
         </div>
+
+        <div className="guide-section">
+          <h3>7 · Attack catalog <span className="role-note">Inject Event → type</span></h3>
+          <p style={{ fontSize: 12.5, margin: "0 0 6px" }}>
+            10 dummy attack types (allowlist-enforced — no real malware). Each turns the
+            target node red and opens a scored incident.
+          </p>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead>
+                <tr><th>Type</th><th>What it does</th><th>ATT&amp;CK phase</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>portscan</code></td><td>Scans ports to find open services</td><td>Reconnaissance</td></tr>
+                <tr><td><code>phishing</code></td><td>Fake link/portal to steal credentials</td><td>Initial Access</td></tr>
+                <tr><td><code>supply_chain_anomaly</code></td><td>Vendor compromise — expired cert / hash mismatch</td><td>Supply Chain</td></tr>
+                <tr><td><code>bruteforce</code></td><td>Repeated password guessing</td><td>Credential Access</td></tr>
+                <tr><td><code>lateral_move</code></td><td>Host-to-host spread after a breach</td><td>Lateral Movement</td></tr>
+                <tr><td><code>ransomware</code></td><td>Encrypts files for ransom (dummy)</td><td>Impact</td></tr>
+                <tr><td><code>data_exfil</code></td><td>Steals &amp; uploads data out</td><td>Exfiltration</td></tr>
+                <tr><td><code>dns_tunnel</code></td><td>Covert channel hidden inside DNS queries</td><td>C2 / Exfil</td></tr>
+                <tr><td><code>ot_fault</code></td><td>OT/ICS attack → physical failure (power/HVAC)</td><td>Impact (OT)</td></tr>
+                <tr><td><code>c2_jamming</code></td><td>Disrupts comms → stale/conflicting leader data</td><td>Inhibit C2</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style={{ fontSize: 12, color: "var(--muted)", margin: "6px 0 0" }}>
+            💡 See the matching SOC/SIEM logs appear in the centre feed right after injecting.
+          </p>
+        </div>
       </div>
     </div>
   );
